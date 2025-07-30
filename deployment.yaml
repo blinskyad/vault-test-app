@@ -1,14 +1,22 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: vault-demo-app
-  namespace: argocd
+  name: vault-demo
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/blinskyad/vault-test-app.git
-    targetRevision: master
-    path: .
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: default
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault-demo
+  template:
+    metadata:
+      labels:
+        app: vault-demo
+    spec:
+      containers:
+      - name: vault-demo
+        image: nginx
+        env:
+        - name: DB_USER
+          value: "<path:secret/data/argocd/test-secret#username>"
+        - name: DB_PASSWORD
+          value: "<path:secret/data/argocd/test-secret#password>"
